@@ -1,0 +1,44 @@
+name: Clean New Data
+
+on:
+  push:
+    paths:
+      - '**/*.csv'
+      - '**/*.xlsx'
+    branches:
+      branches: [ "main" ]
+
+jobs:
+  clean-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install pandas numpy requests openpyxl re sys os
+
+    - name: Detect changed file
+      id: detect_file
+      run: |
+        echo "CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1)" >> $GITHUB_ENV
+
+    - name: Run data cleaning script
+      run: |
+        python clean_data_script.py "$CHANGED_FILE"
+
+    - name: Commit cleaned data
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add *_CLEANED.csv
+        git commit -m "Automated: Cleaned $CHANGED_FILE"
+        git push
+      continue-on-error: true
