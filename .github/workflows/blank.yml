@@ -27,10 +27,13 @@ jobs:
     - name: Detect changed file
       id: detect_file
       run: |
-        echo "CHANGED_FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1)" >> $GITHUB_ENV
-
+        changed_file=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1)
+        echo "Changed file: $changed_file"
+        echo "CHANGED_FILE=$changed_file" >> $GITHUB_ENV
+  
     - name: Run data cleaning script
       run: |
+        echo "📂 Cleaning file: $CHANGED_FILE"
         python clean_data_script.py "$CHANGED_FILE"
 
     - name: Commit cleaned data
