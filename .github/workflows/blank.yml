@@ -2,11 +2,10 @@ name: Clean New Data
 
 on:
   push:
+    branches: [ "main" ]
     paths:
       - '**/*.csv'
       - '**/*.xlsx'
-    branches:
-      branches: [ "main" ]
 
 jobs:
   clean-data:
@@ -23,7 +22,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install pandas numpy requests openpyxl re sys os
+        pip install pandas numpy requests openpyxl
 
     - name: Detect changed file
       id: detect_file
