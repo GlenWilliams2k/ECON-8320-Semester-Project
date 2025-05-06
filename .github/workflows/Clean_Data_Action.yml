@@ -33,7 +33,7 @@ jobs:
   
     - name: Run data cleaning script
       run: |
-        echo "📂 Cleaning file: $CHANGED_FILE"
+        echo "Cleaning file: $CHANGED_FILE"
         python clean_data_script.py "$CHANGED_FILE"
 
     - name: Commit cleaned data
