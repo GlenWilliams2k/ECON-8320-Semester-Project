@@ -14,6 +14,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -27,11 +29,12 @@ jobs:
     - name: Detect changed file
       id: detect_file
       run: |
-        changed_file=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1)
+        changed_file=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1 || true)
         echo "Changed file: $changed_file"
-        echo "CHANGED_FILE=$changed_file" >> $GITHUB_ENV
+        echo "CHANGED_FILE=$changed_file" >> $GITHUB_EN
   
     - name: Run data cleaning script
+      if: env.CHANGED_FILE != ''
       run: |
         echo "Cleaning file: ${{ env.CHANGED_FILE }}"
         python clean_data_script.py "${{ env.CHANGED_FILE }}"
