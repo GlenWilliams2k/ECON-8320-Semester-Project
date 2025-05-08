@@ -31,10 +31,10 @@ jobs:
         echo "Changed file: $changed_file"
         echo "CHANGED_FILE=$changed_file" >> $GITHUB_ENV
   
-- name: Run data cleaning script
-  run: |
-    echo "Cleaning file: ${{ env.CHANGED_FILE }}"
-    python clean_data_script.py "${{ env.CHANGED_FILE }}"
+    - name: Run data cleaning script
+      run: |
+        echo "Cleaning file: ${{ env.CHANGED_FILE }}"
+        python clean_data_script.py "${{ env.CHANGED_FILE }}"
 
     - name: Commit cleaned data
       run: |
