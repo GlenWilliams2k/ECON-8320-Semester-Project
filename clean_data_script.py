@@ -24,31 +24,33 @@ def fetch_zip_info(zip_codes):
             zip_to_locale[zip_code] = {'City': 'Error', 'State': 'Error'}
     return zip_to_locale
 
-def clean_data(filepath, sheet_name="None"):
+def clean_data(filepath, sheet_name = None):
     """Clean the service learning data."""
     today = pd.Timestamp.today()
 
     # Read file (Excel or CSV)
     if filepath.endswith('.xlsx'):
-        data = pd.read_excel(filepath, sheet_name=sheet_name)
+        # Safely read Excel with specified sheet name
+        xl = pd.ExcelFile(filepath)
+        if sheet_name and sheet_name not in xl.sheet_names:
+            raise ValueError(f"Sheet '{sheet_name}' not found. Available sheets: {xl.sheet_names}")
+        data = xl.parse(sheet_name) if sheet_name else xl.parse(xl.sheet_names[0])
     elif filepath.endswith('.csv'):
         data = pd.read_csv(filepath)
     else:
         raise ValueError("Unsupported file format: Only .csv or .xlsx allowed.")
 
     # Clean Payment Submitted Date
-    def extract_date(text):
-        if isinstance(text, pd.Timestamp):
-            return text.strftime("%m/%d/%Y")
-        match = re.search(r'\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b', str(text))
-        return match.group(0) if match else None
-    # Extract dates
-    data['Payment Submitted Date'] = data['Payment Submitted?'].apply(extract_date)
-    # Convert to datetime
+    # Duplicate Payment Submitted?
+    data['Payment Submitted Date'] = data['Payment Submitted?']
+    # Convert to datetime and fill non-dates with NaT
     data['Payment Submitted Date'] = pd.to_datetime(data['Payment Submitted Date'], errors='coerce')
     # Ensure the column is explicitly set to 'Yes' if a valid date was found
-    has_date = data['Payment Submitted Date'].notna()
-    data.loc[has_date, 'Payment Submitted?'] = 'Yes'
+    data['Payment Submitted?'] = data['Payment Submitted?'].apply(
+    lambda x: x if pd.to_datetime(x, errors='coerce') is pd.NaT else 'Yes')
+
+    #Grant Request Date
+    data["Grant Req Date"] = pd.to_datetime(data["Grant Req Date"]).dt.strftime('%m/%d/%Y')
 
     # Clean Zip, City, State
     data['Pt Zip'] = data['Pt Zip'].astype(str).str.strip().str.extract(r'(\d{5})')[0]
@@ -142,6 +144,8 @@ def clean_data(filepath, sheet_name="None"):
 
     # Clean Remaining Balance
     data['Remaining Balance'] = pd.to_numeric(data['Remaining Balance'], errors='coerce').round(2)
+    #Clean Amount
+    data['Amount'] = pd.to_numeric(data['Amount'], errors='coerce').round(2)
 
     # Clean Patient Letter Notified
     def letter_notified(val):
@@ -154,11 +158,19 @@ def clean_data(filepath, sheet_name="None"):
         except:
             return 'No'
     
+    #create date notified
+    data['Date Notified'] = data['Patient Letter Notified? (Directly/Indirectly through rep)']
+    # Convert to datetime and fill non-dates with NaT
+    data['Date Notified'] = pd.to_datetime(data['Date Notified'], errors='coerce')
+    #cleaning Patiend Letter Notified
     data['Patient Letter Notified? (Directly/Indirectly through rep)'] = data['Patient Letter Notified? (Directly/Indirectly through rep)'].apply(letter_notified)
        
     #Clean Payable to:
     # Replace blanks or whitespace-only strings with "Missing"
     data['Payable to:'] = data['Payable to:'].replace(r'^\s*$', "Missing", regex=True)
+
+    #Clean Application Signed?
+    data['Application Signed?'] = data['Application Signed?'].replace(np.nan, "Missing", regex=True)
 
     # Export cleaned data for testing
     #output_path = r"C:\Users\Glen\Documents\Tools For Data Analysis\Semester Project\cleaned_data.csv"
@@ -173,15 +185,22 @@ def clean_data(filepath, sheet_name="None"):
 
 def main():
     if len(sys.argv) < 2:
-        raise ValueError("❌ No input file provided. Usage: python clean_data_script.py <input_file>")
+        raise ValueError("No input file provided. Usage: python clean_data_script.py <input_file>")
 
     input_file = sys.argv[1]
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"Input file '{input_file}' not found.")
+
+    # Determine output file
     output_file = os.path.splitext(input_file)[0] + "_CLEANED.csv"
     sheet_name = "PA Log Sheet" if input_file.endswith(".xlsx") else None
 
+    print(f"Reading from: {input_file}")
     cleaned_df = clean_data(input_file, sheet_name=sheet_name)
+
+    print(f"Saving cleaned data to: {output_file}")
     cleaned_df.to_csv(output_file, index=False)
-    print(f"✅ Cleaned {input_file} -> {output_file}")
+    print(f"✅ Cleaning completed: {input_file} -> {output_file}")
 
 if __name__ == "__main__":
     main()
