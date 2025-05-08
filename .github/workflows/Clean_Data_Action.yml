@@ -31,7 +31,7 @@ jobs:
       run: |
         changed_file=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.csv$|\.xlsx$' | head -n 1 || true)
         echo "Changed file: $changed_file"
-        echo "CHANGED_FILE=$changed_file" >> $GITHUB_EN
+        echo "CHANGED_FILE=$changed_file" >> $GITHUB_ENV
   
     - name: Run data cleaning script
       if: env.CHANGED_FILE != ''
