@@ -1,7 +1,7 @@
 name: Clean New Data
 
 permissions:
-  contents: writ
+  contents: write
 
 on:
   push:
