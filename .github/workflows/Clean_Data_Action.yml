@@ -1,5 +1,8 @@
 name: Clean New Data
 
+permissions:
+  contents: writ
+
 on:
   push:
     branches: [ "main" ]
