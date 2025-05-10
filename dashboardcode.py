@@ -15,9 +15,10 @@ cleaned_files = glob.glob("*_CLEANED.csv")
 df_list = [pd.read_csv(f) for f in cleaned_files]
 db_data = pd.concat(df_list, ignore_index=True)
 
-#load data
+#load data for local development
 #db_data = pd.read_csv("C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv")
-#db_data_pending = db_data[db_data["Request Status"] == "Pending"]
+
+db_data_pending = db_data[db_data["Request Status"] == "Pending"]
 
 st.set_page_config(
     page_title = "Nebraska Cancer Specialists Hope Foundation Dashboard",
