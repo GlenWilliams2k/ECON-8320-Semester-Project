@@ -23,7 +23,7 @@ st.set_page_config(
     layout = "wide")
 st.title("Nebraska Cancer Specialists Hope Foundation Dashboard")
 
-st.logo(image="https://ncshopefoundation.org/wp-content/uploads/2023/06/NCS_Hope-Foundation-logo.webp", 
+st.logo(image="https://www.bricksrus.com/donorsite/images/logo-NCSHF.png", 
         icon_image="https://ncshopefoundation.org/wp-content/uploads/2023/05/sun.webp")
 
 #Page navigation
