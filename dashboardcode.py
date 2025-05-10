@@ -6,7 +6,7 @@ import pandas as pd
 import glob
 import os
 
-
+#for later use
 # Find all CSV files ending in _CLEANED.csv in the current directory
 cleaned_files = glob.glob("*_CLEANED.csv")
 #Print which files are being read
@@ -15,10 +15,8 @@ cleaned_files = glob.glob("*_CLEANED.csv")
 df_list = [pd.read_csv(f) for f in cleaned_files]
 db_data = pd.concat(df_list, ignore_index=True)
 
-#load data for local development
+#load data
 #db_data = pd.read_csv("C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv")
-
-db_data_pending = db_data[db_data["Request Status"] == "Pending"]
 
 st.set_page_config(
     page_title = "Nebraska Cancer Specialists Hope Foundation Dashboard",
@@ -32,7 +30,8 @@ with st.sidebar:
     signed_filter = st.selectbox("Filter by Signature Status:", signature_options)
     if signed_filter != "All":
         db_data = db_data[db_data["Application Signed?"] == signed_filter]
-
+#page 1 dataframe
+db_data_pending = db_data[db_data["Request Status"] == "Pending"]
 #create page 1 card dfs
 pending_apps = db_data_pending["Patient ID#"].nunique()
 signed_apps = db_data_pending[db_data_pending["Application Signed?"] == "YES"]["Patient ID#"].nunique()
@@ -66,14 +65,16 @@ p1_bar = st.bar_chart(data = p1_bar_data, x="Type of Assistance (CLASS)", y="Amo
 pg4_df = db_data[db_data["Request Status"] == "Approved"]
 pg4_df["City, State"] = pg4_df["Pt City"] + " , " + pg4_df["Pt State"] .fillna('')
 #page 4 card dataframes
-total_amt_awarded_df= pg4_df["Amount"].sum().reset_index
+total_amt_awarded_df= pg4_df["Amount"].sum().round()
 total_applicants_awarded_df = pg4_df["Patient ID#"].nunique()
-avg_award_amt_df = pg4_df.groupby("Patient ID#")["Amount"].mean().reset_index()
+total_amount = pg4_df["Amount"].sum()
+num_unique_patients = pg4_df["Patient ID#"].nunique()
+avg_award = (total_amount / num_unique_patients).round(2)
 #page 4 cards
 kpi5, kpi6, kpi7 = st.columns(3)
 kpi5.metric(label = "Total Assistance Awarded", value = total_amt_awarded_df)
 kpi6.metric(label = "Total Applicants Awarded", value = total_applicants_awarded_df)
-kpi7.metric(label = "Average Assistance Amount per Patient", value = avg_award_amt_df)
+kpi7.metric(label = "Average Assistance Amount per Patient", value = avg_award)
 
 #bar graph of contribution by insurance type
 p4_bar1_data = pg4_df.groupby("Insurance Type")["Amount"].sum().reset_index()
