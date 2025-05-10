@@ -3,23 +3,21 @@
 #pip install streamlit
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import glob
 import os
 
-#for later use
+
 # Find all CSV files ending in _CLEANED.csv in the current directory
-#cleaned_files = glob.glob("*_CLEANED.csv")
+cleaned_files = glob.glob("*_CLEANED.csv")
 #Print which files are being read
 #print(f"Found cleaned files: {cleaned_files}")
 # Combine them into a single DataFrame
-#df_list = [pd.read_csv(f) for f in cleaned_files]
-#db_data = pd.concat(df_list, ignore_index=True)
+df_list = [pd.read_csv(f) for f in cleaned_files]
+db_data = pd.concat(df_list, ignore_index=True)
 
 #load data
-db_data = pd.read_csv("C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv")
-db_data_pending = db_data[db_data["Request Status"] == "Pending"]
+#db_data = pd.read_csv("C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv")
+#db_data_pending = db_data[db_data["Request Status"] == "Pending"]
 
 st.set_page_config(
     page_title = "Nebraska Cancer Specialists Hope Foundation Dashboard",
