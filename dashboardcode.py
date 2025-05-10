@@ -23,65 +23,71 @@ st.set_page_config(
     layout = "wide")
 st.title("Nebraska Cancer Specialists Hope Foundation Dashboard")
 
-#page 1
-with st.sidebar:
-    # Filter by "Application Signed?"
-    signature_options = ["All"] + list(pd.unique(db_data["Application Signed?"]))
-    signed_filter = st.selectbox("Filter by Signature Status:", signature_options)
-    if signed_filter != "All":
-        db_data = db_data[db_data["Application Signed?"] == signed_filter]
-#page 1 dataframe
-db_data_pending = db_data[db_data["Request Status"] == "Pending"]
-#create page 1 card dfs
-pending_apps = db_data_pending["Patient ID#"].nunique()
-signed_apps = db_data_pending[db_data_pending["Application Signed?"] == "YES"]["Patient ID#"].nunique()
-missing_apps = db_data_pending[db_data_pending["Application Signed?"] == "MISSING"]["Patient ID#"].nunique()
-unsigned_apps = db_data_pending[db_data_pending["Application Signed?"] == "NO"]["Patient ID#"].nunique()
-#create page 1 cards
-kpi1, kpi2, kpi3, kpi4, = st.columns(4)
-kpi1.metric(label = "Pending Applications", value = pending_apps)
-kpi2.metric(label = "Signed Pending Applications", value = signed_apps)
-kpi3.metric(label = "Pending Unsigned Applications", value = unsigned_apps)
-kpi4.metric(label = "Pending Applications Missing Signature Status", value = missing_apps)
+#Page navigation
+page = st.sidebar.radio("Select a Page", ["Pending Applications", "Executive Impact Summary"])
 
-#Streamlit Dataframe filtered to only pending applications
-pg1_df = db_data[db_data["Request Status"] == "Pending"][
-    ["Patient ID#", "Grant Req Date", "Application Signed?", "Pt Zip", "Insurance Type", 
-     "Total Household Gross Monthly Income", "Type of Assistance (CLASS)", "Amount", 
-     "Referral Source", "Notes"]]
-pg1 = st.data_editor(pg1_df)
-
-#grouping assitance type by amount
-p1_bar_data = pg1.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
-
-#streamlit barchart for assitance type by amount
-p1_bar = st.bar_chart(data = p1_bar_data, x="Type of Assistance (CLASS)", y="Amount", x_label = "Assistance Type", y_label = "Amount Requested", horizontal = False)
+# Pending Applications Page - page 1
+if page == "Pending Applications":
+    st.header("Pending Applications")
+    with st.sidebar:
+        # Filter by "Application Signed?"
+        signature_options = ["All"] + list(pd.unique(db_data["Application Signed?"]))
+        signed_filter = st.selectbox("Filter by Signature Status:", signature_options)
+        if signed_filter != "All":
+            db_data = db_data[db_data["Application Signed?"] == signed_filter]
+    #page 1 dataframe
+    db_data_pending = db_data[db_data["Request Status"] == "Pending"]
+    #create page 1 card dfs
+    pending_apps = db_data_pending["Patient ID#"].nunique()
+    signed_apps = db_data_pending[db_data_pending["Application Signed?"] == "YES"]["Patient ID#"].nunique()
+    missing_apps = db_data_pending[db_data_pending["Application Signed?"] == "MISSING"]["Patient ID#"].nunique()
+    unsigned_apps = db_data_pending[db_data_pending["Application Signed?"] == "NO"]["Patient ID#"].nunique()
+    #create page 1 cards
+    kpi1, kpi2, kpi3, kpi4, = st.columns(4)
+    kpi1.metric(label = "Pending Applications", value = pending_apps)
+    kpi2.metric(label = "Signed Pending Applications", value = signed_apps)
+    kpi3.metric(label = "Pending Unsigned Applications", value = unsigned_apps)
+    kpi4.metric(label = "Pending Applications Missing Signature Status", value = missing_apps)
+    
+    #Streamlit Dataframe filtered to only pending applications
+    pg1_df = db_data[db_data["Request Status"] == "Pending"][
+        ["Patient ID#", "Grant Req Date", "Application Signed?", "Pt Zip", "Insurance Type", 
+         "Total Household Gross Monthly Income", "Type of Assistance (CLASS)", "Amount", 
+         "Referral Source", "Notes"]]
+    pg1 = st.data_editor(pg1_df)
+    
+    #grouping assitance type by amount
+    p1_bar_data = pg1.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
+    
+    #streamlit barchart for assitance type by amount
+    p1_bar = st.bar_chart(data = p1_bar_data, x="Type of Assistance (CLASS)", y="Amount", x_label = "Assistance Type", y_label = "Amount Requested", horizontal = False)
 
 #page 2
 
-
-#page 4
-#page 4 dataframe
-pg4_df = db_data[db_data["Request Status"] == "Approved"]
-pg4_df["City, State"] = pg4_df["Pt City"] + " , " + pg4_df["Pt State"] .fillna('')
-#page 4 card dataframes
-total_amt_awarded_df= pg4_df["Amount"].sum().round()
-total_applicants_awarded_df = pg4_df["Patient ID#"].nunique()
-total_amount = pg4_df["Amount"].sum()
-num_unique_patients = pg4_df["Patient ID#"].nunique()
-avg_award = (total_amount / num_unique_patients).round(2)
-#page 4 cards
-kpi5, kpi6, kpi7 = st.columns(3)
-kpi5.metric(label = "Total Assistance Awarded", value = total_amt_awarded_df)
-kpi6.metric(label = "Total Applicants Awarded", value = total_applicants_awarded_df)
-kpi7.metric(label = "Average Assistance Amount per Patient", value = avg_award)
-
-#bar graph of contribution by insurance type
-p4_bar1_data = pg4_df.groupby("Insurance Type")["Amount"].sum().reset_index()
-p4_bar1 = st.bar_chart(data = p4_bar1_data, x = "Insurance Type", y = "Amount")
-#bar graph of contribution by assistance type
-p4_bar2_data = pg4_df.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
-p4_bar2 = st.bar_chart(data = p4_bar2_data, x = "Type of Assistance (CLASS)", y = "Amount", x_label = "Assistance Type", y_label = "Amount Approved" )
-#bar graph of contribution by city, state
-p4_bar3_data = pg4_df.groupby("City, State")["Amount"].sum().reset_index().sort_values(by = "Amount", ascending = False).head(20)
-p4_bar3 = st.bar_chart(data = p4_bar3_data, x = "City, State", y = "Amount")
+#Executive Impact Summary Page - page 4
+elif page == "Executive Impact Summary":
+    st.header("Exective Impact Summary")
+    #page 4 dataframe
+    pg4_df = db_data[db_data["Request Status"] == "Approved"]
+    pg4_df["City, State"] = pg4_df["Pt City"] + " , " + pg4_df["Pt State"] .fillna('')
+    #page 4 card dataframes
+    total_amt_awarded_df= pg4_df["Amount"].sum().round()
+    total_applicants_awarded_df = pg4_df["Patient ID#"].nunique()
+    total_amount = pg4_df["Amount"].sum()
+    num_unique_patients = pg4_df["Patient ID#"].nunique()
+    avg_award = (total_amount / num_unique_patients).round(2)
+    #page 4 cards
+    kpi5, kpi6, kpi7 = st.columns(3)
+    kpi5.metric(label = "Total Assistance Awarded", value = total_amt_awarded_df)
+    kpi6.metric(label = "Total Applicants Awarded", value = total_applicants_awarded_df)
+    kpi7.metric(label = "Average Assistance Amount per Patient", value = avg_award)
+    
+    #bar graph of contribution by insurance type
+    p4_bar1_data = pg4_df.groupby("Insurance Type")["Amount"].sum().reset_index()
+    p4_bar1 = st.bar_chart(data = p4_bar1_data, x = "Insurance Type", y = "Amount")
+    #bar graph of contribution by assistance type
+    p4_bar2_data = pg4_df.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
+    p4_bar2 = st.bar_chart(data = p4_bar2_data, x = "Type of Assistance (CLASS)", y = "Amount", x_label = "Assistance Type", y_label = "Amount Approved" )
+    #bar graph of contribution by city, state
+    p4_bar3_data = pg4_df.groupby("City, State")["Amount"].sum().reset_index().sort_values(by = "Amount", ascending = False).head(20)
+    p4_bar3 = st.bar_chart(data = p4_bar3_data, x = "City, State", y = "Amount")
