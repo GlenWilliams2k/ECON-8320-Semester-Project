@@ -7,7 +7,7 @@ import re
 
 #function to fetch zip codes
 def fetch_zip_info(zip_codes):
-    """Fetch city and state info for zip codes."""
+    """Fetch city, state, latitude, and longitude for zip codes."""
     zip_to_locale = {}
     for zip_code in zip_codes:
         try:
@@ -15,13 +15,31 @@ def fetch_zip_info(zip_codes):
             response = requests.get(url)
             if response.status_code == 200:
                 zip_data = response.json()
-                city = zip_data['places'][0]['place name']
-                state = zip_data['places'][0]['state abbreviation']
-                zip_to_locale[zip_code] = {'City': city, 'State': state}
+                place = zip_data['places'][0]
+                city = place['place name']
+                state = place['state abbreviation']
+                latitude = float(place['latitude'])
+                longitude = float(place['longitude'])
+                zip_to_locale[zip_code] = {
+                    'City': city,
+                    'State': state,
+                    'Latitude': latitude,
+                    'Longitude': longitude
+                }
             else:
-                zip_to_locale[zip_code] = {'City': 'Unknown', 'State': 'Unknown'}
+                zip_to_locale[zip_code] = {
+                    'City': 'Unknown',
+                    'State': 'Unknown',
+                    'Latitude': None,
+                    'Longitude': None
+                }
         except Exception:
-            zip_to_locale[zip_code] = {'City': 'Error', 'State': 'Error'}
+            zip_to_locale[zip_code] = {
+                'City': 'Error',
+                'State': 'Error',
+                'Latitude': None,
+                'Longitude': None
+            }
     return zip_to_locale
 
 def clean_data(filepath, sheet_name = None):
@@ -55,14 +73,16 @@ def clean_data(filepath, sheet_name = None):
     # Clean Zip, City, State
     data['Pt Zip'] = data['Pt Zip'].astype(str).str.strip().str.extract(r'(\d{5})')[0]
     data['Pt Zip'] = data['Pt Zip'].fillna("Missing")
-
     data.loc[data['Pt Zip'] == "Missing", ['Pt City', 'Pt State']] = "Missing"
 
     valid_zips = data[data['Pt Zip'] != "Missing"]['Pt Zip'].unique()
     zip_to_locale = fetch_zip_info(valid_zips)
 
+    # Add City, State, Latitude, Longitude
     data['Pt City'] = data['Pt Zip'].apply(lambda z: zip_to_locale.get(z, {}).get('City', 'Missing'))
     data['Pt State'] = data['Pt Zip'].apply(lambda z: zip_to_locale.get(z, {}).get('State', 'Missing'))
+    data['Latitude'] = data['Pt Zip'].apply(lambda z: zip_to_locale.get(z, {}).get('Latitude'))
+    data['Longitude'] = data['Pt Zip'].apply(lambda z: zip_to_locale.get(z, {}).get('Longitude'))
 
     # Clean DOB
     data['DOB'] = pd.to_datetime(data['DOB'], errors='coerce')
@@ -174,7 +194,7 @@ def clean_data(filepath, sheet_name = None):
     data['Application Signed?'] = data['Application Signed?'].str.upper()
 
     # Export cleaned data for testing
-    #output_path = r"C:\Users\Glen\Documents\Tools For Data Analysis\Semester Project\cleaned_data.csv"
+    #output_path = r"C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv"
     #data.to_csv(output_path, index=False)
 
     #Export cleaned data as part of github action
