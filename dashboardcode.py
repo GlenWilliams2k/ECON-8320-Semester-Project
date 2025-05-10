@@ -23,6 +23,9 @@ st.set_page_config(
     layout = "wide")
 st.title("Nebraska Cancer Specialists Hope Foundation Dashboard")
 
+st.logo(image="https://ncshopefoundation.org/wp-content/uploads/2023/06/NCS_Hope-Foundation-logo.webp", 
+        icon_image="https://ncshopefoundation.org/wp-content/uploads/2023/05/sun.webp")
+
 #Page navigation
 page = st.sidebar.radio("Select a Page", ["Pending Applications", "Executive Impact Summary"])
 
@@ -63,6 +66,8 @@ if page == "Pending Applications":
     p1_bar = st.bar_chart(data = p1_bar_data, x="Type of Assistance (CLASS)", y="Amount", x_label = "Assistance Type", y_label = "Amount Requested", horizontal = False)
 
 #page 2
+
+#page 3
 
 #Executive Impact Summary Page - page 4
 elif page == "Executive Impact Summary":
