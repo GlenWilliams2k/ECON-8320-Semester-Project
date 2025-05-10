@@ -29,12 +29,12 @@ page = st.sidebar.radio("Select a Page", ["Pending Applications", "Executive Imp
 # Pending Applications Page - page 1
 if page == "Pending Applications":
     st.header("Pending Applications")
-    with st.sidebar:
         # Filter by "Application Signed?"
         signature_options = ["All"] + list(pd.unique(db_data["Application Signed?"]))
         signed_filter = st.selectbox("Filter by Signature Status:", signature_options)
         if signed_filter != "All":
             db_data = db_data[db_data["Application Signed?"] == signed_filter]
+    
     #page 1 dataframe
     db_data_pending = db_data[db_data["Request Status"] == "Pending"]
     #create page 1 card dfs
