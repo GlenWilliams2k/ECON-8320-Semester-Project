@@ -5,8 +5,6 @@ import plotly.graph_objects as go
 import glob
 import os
 from datetime import timedelta, datetime
-import pandas_profiling
-from streamlit_pandas_profiling import st_profile_report
 
 #for later use
 # Find all CSV files ending in _CLEANED.csv in the current directory
