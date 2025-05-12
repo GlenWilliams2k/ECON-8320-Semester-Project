@@ -29,8 +29,8 @@ st.logo(image="https://www.bricksrus.com/donorsite/images/logo-NCSHF.png",
 #Page navigation
 with st.sidebar:
      page = st.radio("Select a Page", ["Pending Applications", "Assistance Given by Demographics", "Assistance Delivery Duration", "Grant Utilization", "Executive Impact Summary"])
-     max_date = db_data['Grant Req Date'].max().date()
-     min_date = db_data['Grant Req Date'].min().date()
+     max_date = pd.to_datetime(data["Grant Req Date"], errors="coerce").max().date()
+     min_date = pd.to_datetime(data["Grant Req Date"], errors="coerce").min().date()
      default_start_date = min_date  # Show all time by default
      default_end_date = max_date
      start_date = st.date_input("Start date", default_start_date, min_value=db_data['Grant Req Date'].min().date(), max_value=max_date)
