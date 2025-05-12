@@ -33,8 +33,8 @@ with st.sidebar:
      min_date = pd.to_datetime(db_data["Grant Req Date"], errors="coerce").min().date()
      default_start_date = min_date  # Show all time by default
      default_end_date = max_date
-     start_date = st.date_input("Start date", default_start_date, min_value=db_data['Grant Req Date'].min().date(), max_value=max_date)
-     end_date = st.date_input("End date", default_end_date, min_value=db_data['Grant Req Date'].min().date(), max_value=max_date)
+     start_date = st.date_input("Start date", default_start_date, min_value=min_date, max_value=max_date)
+     end_date = st.date_input("End date", default_end_date, min_value=min_date, max_value=max_date)
 
 #filtering db data based on user selection
 db_data = db_data[(db_data['Grant Req Date'].dt.date >= start_date) & (db_data['Grant Req Date'].dt.date <= end_date)]
