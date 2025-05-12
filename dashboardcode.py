@@ -18,6 +18,9 @@ db_data = pd.concat(df_list, ignore_index=True)
 #load data
 #db_data = pd.read_csv("C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv")
 
+#convert request date to datetime
+db_data['Grant Req Date'] = pd.to_datetime(db_data['Grant Req Date'], errors='coerce')
+
 st.set_page_config(
     page_title = "Nebraska Cancer Specialists Hope Foundation Dashboard",
     layout = "wide")
