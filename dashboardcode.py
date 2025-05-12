@@ -33,7 +33,7 @@ st.logo(image="https://www.bricksrus.com/donorsite/images/logo-NCSHF.png",
 
 #Page navigation
 with st.sidebar:
-     page = st.radio("Select a Page", ["Pending Applications", "Assistance Given by Demographics", "Assistance Delivery Duration", "Grant Utilization", "Executive Impact Summary", "Data Profile"])
+     page = st.radio("Select a Page", ["Pending Applications", "Assistance Given by Demographics", "Assistance Delivery Duration", "Grant Utilization", "Executive Impact Summary"])
      max_date = pd.to_datetime(db_data["Grant Req Date"], errors="coerce").max().date()
      min_date = pd.to_datetime(db_data["Grant Req Date"], errors="coerce").min().date()
      default_start_date = min_date  # Show all time by default
@@ -238,8 +238,3 @@ elif page == "Executive Impact Summary":
     p4_bar4_data = p4_bar4_data.sort_values(by="Amount", ascending=True)
     st.subheader("Total Assistance by Bottom 20 City and State")
     p4_bar4 = st.bar_chart(data = p4_bar4_data, x = "City, State", y = "Amount")
-
-#data profile - page 6
-elif page == "Data Profile":
-    pr = db_data.profile_report()
-    st_profile_report(pr)
