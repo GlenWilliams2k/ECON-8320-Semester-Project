@@ -193,6 +193,18 @@ def clean_data(filepath, sheet_name = None):
     data['Application Signed?'] = data['Application Signed?'].replace(np.nan, "Missing", regex=True)
     data['Application Signed?'] = data['Application Signed?'].str.upper()
 
+    # Clean Type of Assistance
+    data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].astype(str).str.strip().str.lower()
+    data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].apply(lambda x: 'utilities' if x.startswith('u') else x)
+    data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].str.title()
+
+    # Clean Marital Status
+    data['Marital Status'] = data['Marital Status'].astype(str).str.strip().str.lower().str.title()
+    data['Marital Status'] = data['Marital Status'].apply(lambda x: 'Seperated' if x.startswith('Se') else x)
+
+    # Clean Gender
+    data['Gender'] = data['Gender'].astype(str).str.strip().str.lower().str.title()
+
     # Export cleaned data for testing
     #output_path = r"C:\\Users\\Glen\\Documents\\ToolsForDataAnalysis\\SemesterProject\\cleaned_data.csv"
     #data.to_csv(output_path, index=False)
