@@ -194,7 +194,7 @@ elif page == "Grant Utilization":
 
 #Executive Impact Summary Page - page 5
 elif page == "Executive Impact Summary":
-    st.header("Exective Impact Summary")
+    st.header("Executive Impact Summary")
     #page 4 dataframe
     pg4_df = db_data[db_data["Request Status"] == "Approved"]
     pg4_df["City, State"] = pg4_df["Pt City"] + " , " + pg4_df["Pt State"] .fillna('')
