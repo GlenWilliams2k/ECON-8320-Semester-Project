@@ -132,8 +132,7 @@ def clean_data(filepath, sheet_name = None):
     data['Sexual Orientation'] = data['Sexual Orientation'].str.lower().apply(lambda x: (
         'Decline to answer' if x == 'decline' else
         'Straight' if x.startswith('st') else
-        x.title()
-    ))
+        x.title()))
 
     # Clean HouseHold Size
     data['Household Size'] = pd.to_numeric(data['Household Size'], errors='coerce')
@@ -195,7 +194,9 @@ def clean_data(filepath, sheet_name = None):
 
     # Clean Type of Assistance
     data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].astype(str).str.strip().str.lower()
-    data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].apply(lambda x: 'utilities' if x.startswith('u') else x)
+    data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].apply(
+        lambda x: 'utilities' if x.startswith('u') else x
+    )
     data['Type of Assistance (CLASS)'] = data['Type of Assistance (CLASS)'].str.title()
 
     # Clean Marital Status
