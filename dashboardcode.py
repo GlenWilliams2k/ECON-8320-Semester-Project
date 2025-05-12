@@ -186,7 +186,7 @@ elif page == "Grant Utilization":
     underutilized_grants = ug_db["Patient ID#"].nunique()
     #card for underutilized grants
     kpi10 = st.columns(1)
-    kpi10[0].metric(label = "Number of Underutlized Grants", value = underutilized_grants)
+    kpi10[0].metric(label = "Number of Underutilized Grants", value = underutilized_grants)
     #bar chart of underutilization by assistance type
     ug_db_grouped = ug_db.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
     st.bar_chart(data = ug_db_grouped, x="Type of Assistance (CLASS)", y="Amount", x_label = "Assistance Type", y_label = "Amount Requested", horizontal = False)
