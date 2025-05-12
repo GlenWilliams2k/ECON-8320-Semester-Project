@@ -2,4 +2,5 @@ streamlit
 pandas
 plotly
 pandas_profiling
+setuptools
 pkg_resources
