@@ -32,12 +32,12 @@ st.logo(image="https://www.bricksrus.com/donorsite/images/logo-NCSHF.png",
 #Page navigation
 with st.sidebar:
      page = st.radio("Select a Page", ["Pending Applications", "Assistance Given by Demographics", "Assistance Delivery Duration", "Grant Utilization", "Executive Impact Summary"])
-     max_date = pd.to_datetime(db_data["Grant Req Date"], errors="coerce").max().date()
-     min_date = pd.to_datetime(db_data["Grant Req Date"], errors="coerce").min().date()
+     max_date = db_data['Grant Req Date'].max().date()
+     min_date = db_data['Grant Req Date'].min().date()
      default_start_date = min_date  # Show all time by default
      default_end_date = max_date
-     start_date = st.date_input("Start date", default_start_date, min_value=min_date, max_value=max_date)
-     end_date = st.date_input("End date", default_end_date, min_value=min_date, max_value=max_date)
+     start_date = st.date_input("Start date", default_start_date, min_value=db_data['Grant Req Date'].min().date(), max_value=max_date)
+     end_date = st.date_input("End date", default_end_date, min_value=db_data['Grant Req Date'].min().date(), max_value=max_date)
 
 #filtering db data based on user selection
 db_data = db_data[(db_data['Grant Req Date'].dt.date >= start_date) & (db_data['Grant Req Date'].dt.date <= end_date)]
@@ -86,7 +86,7 @@ elif page == "Assistance Given by Demographics":
     st.header("Assistance Given by Demographics")
     #list of demographic factors
     demo = [
-        'Gender', 'State', 'Zip Code', 'Hispanic or Latino', 'Sexuality', 'Race', 'Insurance Type', 'Household Gross Monthly Income', 'Marital Status', 'Household Size', 'Age']
+        'Age','Gender', 'Hispanic or Latino', 'Household Size', 'Household Gross Monthly Income', 'Insurance Type', 'Marital Status', 'Sexuality', 'State', 'Race', 'Zip Code']
 
     #demographics selectbox
     demo_select = st.selectbox("Select Demographic", demo)
@@ -102,6 +102,8 @@ elif page == "Assistance Given by Demographics":
         insurance_assistance = db_data.groupby("Insurance Type")["Amount"].sum()  
         st.bar_chart(insurance_assistance)
         st.write(insurance_assistance)
+    
+    #HH Income
 
     elif demo_select == "Sexuality":
         sexuality_assistance = db_data.groupby("Sexual Orientation")["Amount"].sum()  
@@ -138,14 +140,12 @@ elif page == "Assistance Given by Demographics":
         map_data = map_data.dropna(subset=["Pt Zip", "Amount", "Latitude", "Longitude"])
 
         # Create a scatter plot map
-        fig = px.scatter_geo(
-            map_data, lat="Latitude", lon="Longitude", color="Amount", hover_name="Pt Zip", hover_data=["Amount"], color_continuous_scale="Viridis", projection="albers usa", title="Assistance Amounts by Zip Code",)
+        fig = px.scatter_mapbox(
+            map_data, lat="Latitude", lon="Longitude", color="Amount", hover_name="Pt Zip", hover_data=["Amount"], color_continuous_scale="Viridis", title="Assistance Amounts by Zip Code", zoom=4, height=600)
 
-        # Update map settings for better visualization
-        fig.update_geos(showcoastlines=True, coastlinecolor="Black", showland=True, landcolor="lightgray")
-        fig.update_layout(
-            geo=dict( projection_type="albers usa", showland=True, landcolor="lightgray", subunitcolor="gray",),
-            title_text="Assistance Amounts by Zip Code", coloraxis_colorbar_title="Assistance Amount")
+        # Update layout 
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r":0,"t":40,"l":0,"b":0})
         
         # Display in Streamlit
         st.plotly_chart(fig)
@@ -162,6 +162,13 @@ elif page == "Assistance Given by Demographics":
         householdsize_assistance = db_data.groupby('Household Size')['Amount'].sum()
         st.bar_chart(householdsize_assistance)
         st.write(householdsize_assistance) 
+
+    #Age
+    elif demo_select == "Age":
+        db_data["DOB"] = pd.to_datetime(db_data["DOB"], errors = 'coerce')
+        db_data["Age"] = ((pd.Timestamp("today")-db_data["DOB"]).dt.days // 365)
+        age_data = db_data.groupby("Age")["Amount"].sum().reset_index()
+        st.bar_chart(data = age_data, x="Age", y="Amount", x_label = "Age", y_label = "Assistance Rendered", horizontal = False)
 
 #Time to Support - page 3
 elif page == "Assistance Delivery Duration":
@@ -186,7 +193,7 @@ elif page == "Grant Utilization":
     underutilized_grants = ug_db["Patient ID#"].nunique()
     #card for underutilized grants
     kpi10 = st.columns(1)
-    kpi10[0].metric(label = "Number of Underutilized Grants", value = underutilized_grants)
+    kpi10[0].metric(label = "Number of Underutlized Grants", value = underutilized_grants)
     #bar chart of underutilization by assistance type
     ug_db_grouped = ug_db.groupby("Type of Assistance (CLASS)")["Amount"].sum().reset_index()
     st.bar_chart(data = ug_db_grouped, x="Type of Assistance (CLASS)", y="Amount", x_label = "Assistance Type", y_label = "Amount Requested", horizontal = False)
@@ -194,7 +201,7 @@ elif page == "Grant Utilization":
 
 #Executive Impact Summary Page - page 5
 elif page == "Executive Impact Summary":
-    st.header("Executive Impact Summary")
+    st.header("Exective Impact Summary")
     #page 4 dataframe
     pg4_df = db_data[db_data["Request Status"] == "Approved"]
     pg4_df["City, State"] = pg4_df["Pt City"] + " , " + pg4_df["Pt State"] .fillna('')
