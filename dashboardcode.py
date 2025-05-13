@@ -167,8 +167,9 @@ elif page == "Assistance Given by Demographics":
     elif demo_select == "Age":
         db_data["DOB"] = pd.to_datetime(db_data["DOB"], errors = 'coerce')
         db_data["Age"] = ((pd.Timestamp("today")-db_data["DOB"]).dt.days // 365)
-        age_data = db_data.groupby("Age")["Amount"].sum().reset_index()
-        st.bar_chart(data = age_data, x="Age", y="Amount", x_label = "Age", y_label = "Assistance Rendered", horizontal = False)
+        age_assistance = db_data.groupby("Age")["Amount"].sum().reset_index()
+        st.bar_chart(data = age_assistance, x="Age", y="Amount", x_label = "Age", y_label = "Assistance Rendered", horizontal = False)
+        st.write(age_assistance)
 
 #Time to Support - page 3
 elif page == "Assistance Delivery Duration":
